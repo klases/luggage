@@ -144,14 +144,15 @@ git -C "$REPO" worktree add --detach "$MUT" "$REV"
 ```
 
 The path must be real, absolute and outside the repo — a literal placeholder or
-a relative path puts the worktree inside the tree you are forbidden to touch. The `$RUN-` prefix is what the cleanup step sweeps for.
+a relative path puts the worktree inside the tree you are forbidden to touch.
+The `$RUN-` prefix is what the cleanup step sweeps for.
 
 **Stack table.** A worktree checks out source, not what was installed beside it.
 Apply **every** row whose marker the repo has — a repo can match more than one.
 
 | Marker in `$REPO` | Prepare the tree | Run the suite as |
 |---|---|---|
-| `grails-app/` | nothing to link | the repo's documented test command (e.g. `./grailsw test-app`), through its dev shell if it declares one |
+| a test command documented in the repo (README, contributor docs, build manifest) | install or link what that command needs that isn't tracked: dependencies, generated code | that command, through the repo's dev shell or wrapper if it declares one |
 | none of these | nothing | no known suite: record it under `not probed` |
 
 A new stack is a new row, not a new branch in the prose.
@@ -212,12 +213,13 @@ three sibling callers still broken, is a finding.
 A change is not done because it runs. It is done when it meets the bar the team
 agreed to. Find that bar, in this order:
 
-1. **The spec** — a `.tasks/` checklist
-   in the repo → the branch's commit messages → nothing. If nothing, say so
+1. **The spec** — a spec or task file the repo keeps for this change (a
+   checklist, a proposal or design doc, an issue the branch links to) → the
+   branch's commit messages → nothing. If nothing, say so
    plainly and run the task axis as *does this change tell a coherent story on
    its own*. Do not skip it, and do not block for its absence.
 2. **The repo's Definition of Done** — the repository's own committed
-   `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING`, `.tasks/`. This is the bar the
+   `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING` and task checklists. This is the bar the
    team agreed to. Untested where it demands tests, undocumented where it
    demands docs — each is a charge with the DoD line as its proof, and it can
    carry `error`.
@@ -264,14 +266,15 @@ You read, and you run. You do **not** edit.
 - **You must not:** edit tracked source, commit, push, or "just fix it while I'm
   here". The moment you fix, you own the code — and can no longer attack it.
 
-Proving a bug needs a failing test? Write it to a temp directory outside the repo, run it there, and
-point at it. Putting it in the tree is the author's job, once you've shown them.
+Proving a bug needs a failing test? Write it to a temp directory outside the
+repo, run it there, and point at it. Putting it in the tree is the author's
+job, once you've shown them.
 
 ## Procedure
 
-1. **Scope.** A branch diff against the
-   detected base (`git symbolic-ref refs/remotes/origin/HEAD`, else `main`, else
-   `master`). Otherwise the working tree. Explicit arguments — paths, a commit
+1. **Scope.** A branch diff against the detected base (`git symbolic-ref
+   refs/remotes/origin/HEAD`, else `main`, else `master`). Otherwise the
+   working tree. Explicit arguments — paths, a commit
    range — override. Do not ask; detect, then state what you picked.
 
    Then mint `REPO`, `RUN`, `IDX`, `SNAP`, `DEFAULT`, and `REV` and `BASE` from
@@ -290,8 +293,9 @@ point at it. Putting it in the tree is the author's job, once you've shown them.
    lenses in sequence and reports each separately, so any single lens can still
    come back `UNPROBED`, and the execution floor still applies per lens. State
    the mode and the numbers that picked it. No subagent tool? Run the lenses
-   yourself in sequence, one report per lens, and say so in `mode:`. *(Thresholds are placeholders
-   pending the user's own criteria.)*
+   yourself in sequence, one report per lens, and say so in `mode:`.
+   *(These thresholds are defaults; a repo's committed docs or the user's
+   instructions may set others.)*
 4. **Run the lenses**, solo or fanned out in parallel per the mode. Each lens
    reads the diff and gathers its **own** evidence. Do not delegate to other
    review skills — a finding that arrives as prose carries no proof, and cannot
@@ -312,17 +316,17 @@ point at it. Putting it in the tree is the author's job, once you've shown them.
      callers.
    - **spec / task** — is this the right thing at all? Quote spec against code.
      Was a requirement misread, an assumption left unwritten? Claims of
-     verification in commit messages ("tests pass", "verified
-     against a running server", "no behaviour change") are spec artifacts too:
+     verification in commit messages ("tests pass", "verified against a
+     running server", "no behaviour change") are spec artifacts too:
      quote the claim, then find what in the change backs it. A claim nothing
      backs is an `error` with the claim as artifact A and the absence as B.
    - **standards** — does the change look like it belongs in this repo? Three
      checks, in this order:
      1. *Convention sweep* (see above): the change against the code around it.
      2. *Definition of Done*: the repo's committed docs, per the tiers above.
-     3. *Over-engineering*: does this
-        need to exist, does the codebase already have it, does the stdlib,
-        platform or an installed dependency do it, would one line do — and
+     3. *Over-engineering*: does this need to exist, does the codebase
+        already have it, does the stdlib, platform or an installed dependency
+        do it, would one line do — and
         legibility: hidden fallbacks, compatibility aliases, implicit
         registration, global mutable state, each needing its necessity
         stated. Name what should be deleted. Personal-bar charges are
