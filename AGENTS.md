@@ -12,7 +12,7 @@ Shared skills and agents for Claude Code and pi.
 ## Working here
 
 Use the repo skills for the jobs they cover: `luggage-new-personal-space`, `luggage-new-personal-skill`,
-`luggage-promote` and `luggage-remove`.
+`luggage-promote`, `luggage-remove` and `luggage-check-personal`.
 
 Propose before acting, with or without a skill. Show every file you will create, change, move or
 delete, and every commit, push or PR, then wait for the user's yes. When there's a choice the user

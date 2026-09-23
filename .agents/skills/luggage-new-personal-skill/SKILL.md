@@ -37,4 +37,6 @@ Nothing is written until the user approves the proposal in step 4.
    - Claude Code: `claude plugin marketplace update luggage`, then `/reload-plugins`. The skill is `/<handle>:<name>`.
    - pi: it picks up the skill from the local package the next time it starts.
 
+   Offer `luggage-check-personal` on the new skill. It's optional; skip it if the user declines.
+
    Then propose a commit: show the files it includes and the message, and commit only on the user's yes. Personal changes go straight to `main`. Push only when the user asks.
