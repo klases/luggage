@@ -4,6 +4,8 @@
   "description": "Shared skills and agents for Claude Code and pi",
   "plugins": [
     { "name": "common", "source": "./common",
-      "description": "Reviewed skills and agents we both stand behind" }
+      "description": "Reviewed skills and agents we both stand behind" },
+    { "name": "klases", "source": "./personal/klases",
+      "description": "Claes Eklund's personal space" }
   ]
 }
