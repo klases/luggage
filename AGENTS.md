@@ -14,6 +14,10 @@ Shared skills and agents for Claude Code and pi.
 Use the repo skills for the jobs they cover: `luggage-new-personal-space`, `luggage-new-personal-skill`,
 `luggage-promote` and `luggage-remove`.
 
+Propose before acting, with or without a skill. Show every file you will create, change, move or
+delete, and every commit, push or PR, then wait for the user's yes. When there's a choice the user
+owns, such as which GitHub account to use, ask; don't pick one.
+
 ## Rules
 
 1. Skill names are unique across the repo and match their folder name. pi keeps only the first skill it finds with a given name.
