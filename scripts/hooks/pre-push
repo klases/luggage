@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Refuses a direct push to main that changes common/; those go through a reviewed PR (AGENTS.md rule 3).
+# Enable per clone: git config core.hooksPath scripts/hooks
+set -euo pipefail
+zero=0000000000000000000000000000000000000000
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ "$remote_ref" = refs/heads/main ] || continue
+  [ "$local_sha" = "$zero" ] && continue    # deleting main
+  [ "$remote_sha" = "$zero" ] && continue   # first push, creating main
+  if ! git cat-file -e "$remote_sha" 2>/dev/null; then
+    echo "pre-push: fetch first; origin/main has commits this clone doesn't have." >&2
+    exit 1
+  fi
+  if git diff --name-only "$remote_sha" "$local_sha" -- common/ | grep -q .; then
+    echo "pre-push: this push changes common/ on main. Open a PR instead (AGENTS.md rule 3)." >&2
+    exit 1
+  fi
+done

@@ -1,0 +1,9 @@
+{
+  "name": "luggage",
+  "owner": { "name": "Claes Eklund" },
+  "description": "Shared skills and agents for Claude Code and pi",
+  "plugins": [
+    { "name": "common", "source": "./common",
+      "description": "Reviewed skills and agents we both stand behind" }
+  ]
+}
