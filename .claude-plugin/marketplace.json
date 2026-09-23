@@ -6,6 +6,8 @@
     { "name": "common", "source": "./common",
       "description": "Reviewed skills and agents we both stand behind" },
     { "name": "klases", "source": "./personal/klases",
-      "description": "Claes Eklund's personal space" }
+      "description": "Claes Eklund's personal space" },
+    { "name": "larsnorlander", "source": "./personal/larsnorlander",
+      "description": "Lars Norlander's personal space" }
   ]
 }
