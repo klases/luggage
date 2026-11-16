@@ -55,7 +55,8 @@ covered, one arrange-act-assert **shape** per test, and an **expected** value pe
 
 Start from a value table, fall back to a scenario table, and keep a test standalone when it cannot
 share the call or the check. A table earns its place at three or more rows, or when more are
-clearly coming.
+clearly coming. Each row adds coverage: a case that the full-result pin or another test already
+proves is not a row. With fewer than three new cases, keep them standalone rather than pad the table.
 
 The examples run against an invented subject in `examples/subject/`: `npm install && npm test` in
 `examples/`.
