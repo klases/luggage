@@ -22,6 +22,7 @@ export class OrderStore {
   readonly orders = new Map<number, Order>()
   readonly totals = new Map<number, OrderTotals>()
   readonly lines: Array<StoredLine> = []
+  readonly confirmed = new Set<number>()
   private nextId = 1
 
   async createOrder(customerId: number): Promise<Order> {
@@ -45,7 +46,10 @@ export class OrderStore {
   }
 
   async removeContents(orderIds: Array<number>): Promise<void> {
-    for (const orderId of orderIds) this.totals.delete(orderId)
+    for (const orderId of orderIds) {
+      this.totals.delete(orderId)
+      this.confirmed.delete(orderId)
+    }
 
     const kept = this.lines.flatMap((line) => (orderIds.includes(line.orderId) ? [] : [line]))
 

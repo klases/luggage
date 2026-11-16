@@ -51,6 +51,7 @@ covered, one arrange-act-assert **shape** per test, and an **expected** value pe
 | Inputs, but the test makes several `expect`s on one call | **Hidden table**, turned into rows | `03-hidden-table.test.ts` |
 | What exists before the call | **Scenario table** | `04-scenario-table.integration.ts` |
 | Fixtures without a result, the full result, or setup a row cannot state | **Unaligned rows** and **standalone tests** | `05-unaligned-scenarios.integration.ts` |
+| What the call leaves behind: stored state, requests to an external service | **Outcome table**, asserting outcomes, not calls | `06-outcomes-not-calls.integration.ts` |
 
 Start from a value table, fall back to a scenario table, and keep a test standalone when it cannot
 share the call or the check. A table earns its place at three or more rows, or when more are
@@ -109,3 +110,6 @@ The examples run against an invented subject in `examples/subject/`: `npm instal
 - Keep every assertion's strength; a case that would lose part of what it proves stays standalone.
 - Conditionals and computation live in the body or a helper, never in a row.
 - A failure case goes in a failure table, never as a flag in a success table.
+- Assert outcomes, not calls to your own code: a stubbed input is fine, a check that it was called
+  is not. Assert an interaction only when it is the contract; a spy is a last resort, with its
+  reason in a comment.
