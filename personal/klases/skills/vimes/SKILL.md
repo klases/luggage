@@ -208,16 +208,57 @@ as artifact B, verbatim with paths: `orders/__tests__/orders.test.ts` against
 other callers of what it touched. A fix on the one path the ticket named, with
 three sibling callers still broken, is a finding.
 
+**Origin check.** Every finding gets an origin before it is graded: does the
+problem exist on `$BASE` already? Reproduce it there, or find the same pattern
+in callers the change did not touch (`git show "$BASE":<path>`, a grep of the
+other callers). The answer is one of three:
+
+- `new`: the change introduces the problem.
+- `existing`: it was there before; the change touches it or builds on it.
+- `mixed`: new behaviour meets an existing gap. For example, the change adds
+  data that an untouched copy path drops.
+
+The origin does not change the proof ladder. A pre-existing bug you reproduced
+is still proven. It changes what the finding counts against: only `new` and
+`mixed` findings can set the verdict. `existing` findings are reported in their
+own section, as follow-up candidates.
+
+**Shared services.** A suite that needs services shared with the user's own
+work (a dev database, a container stack) runs only when the user's instructions
+allow it for this kind of run, and only after its preconditions hold. Otherwise
+the axis is `not probed`, with the reason. A concurrent run against the same
+service turns a mutant's verdict into noise.
+
 ## The standard it's held to
 
 A change is not done because it runs. It is done when it meets the bar the team
 agreed to. Find that bar, in this order:
 
-1. **The spec** — a spec or task file the repo keeps for this change (a
-   checklist, a proposal or design doc, an issue the branch links to) → the
-   branch's commit messages → nothing. If nothing, say so
-   plainly and run the task axis as *does this change tell a coherent story on
-   its own*. Do not skip it, and do not block for its absence.
+1. **The spec**, looked for in this order. Stop at the first that exists, but
+   read the issue as well when a change folder names one:
+   1. A spec-driven change folder for this work: OpenSpec `openspec/changes/<id>/`
+      or an equivalent proposal, design, tasks and spec set. Look in the repo
+      first, then in any spec roots the user's instructions name. Match it by
+      the issue or ticket number in the branch, PR title or commit messages.
+      Read it from the remote's default branch (`git -C <root> fetch -q` then
+      `git -C <root> show origin/HEAD:<path>`): a local checkout of a spec repo
+      lags, and a review never pulls it.
+   2. A spec or task file the repo keeps for this change (a checklist, a design
+      doc).
+   3. An issue the branch or PR links to.
+   4. The branch's commit messages.
+   5. Nothing.
+
+   If nothing, say so plainly and run the task axis as *does this change tell a
+   coherent story on its own*. Do not skip it, and do not block for its absence.
+
+   **Stacked work.** When the tasks split the change across several PRs or
+   commits (a "PR 3 of 5", task groups per PR, a PR stacked on another branch),
+   find this change's part. Match it by PR number, by the `(n/m)` in the title,
+   or by the branch. From then on, this part's tasks are the spec for the
+   review, and the rest of the change is context. An acceptance criterion that a
+   *later* task owns is **deferred**: list it under `deferred`, do not charge
+   it. One that no task owns is a gap in the change, and it is charged.
 2. **The repo's Definition of Done** — the repository's own committed
    `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING` and task checklists. This is the bar the
    team agreed to. Untested where it demands tests, undocumented where it
@@ -280,7 +321,13 @@ job, once you've shown them.
    Then mint `REPO`, `RUN`, `IDX`, `SNAP`, `DEFAULT`, and `REV` and `BASE` from
    the scope's row (see *Scratch trees*). Keep their literal values for the
    cleanup step, and pass them to every lens.
-2. **Spec.** Resolve it via the cascade above. State which source you found.
+
+   If the change is a pull request, read its CI status once (`gh pr checks`).
+   A failing job tells you what is already caught. Note which job fails, and
+   which of its steps would catch a finding: a type error in a compiled test is
+   caught by a build that compiles tests. Pass the CI status to every lens.
+2. **Spec.** Resolve it via the cascade above. State which source you found,
+   and for stacked work, which part this change is.
 3. **Pick the mode.** Measure the scope with
    `git diff --numstat "$BASE" "$REV" -- <scope paths, if any>`, leaving out
    lockfiles and generated files. Run **solo** only when all hold:
@@ -320,6 +367,12 @@ job, once you've shown them.
      running server", "no behaviour change") are spec artifacts too:
      quote the claim, then find what in the change backs it. A claim nothing
      backs is an `error` with the claim as artifact A and the absence as B.
+     For stacked work, classify every acceptance criterion as owned by this
+     part, deferred to a named later task, or unowned. Charge only the first
+     and the last. Then attack the change folder itself. A design that asserts
+     how existing code behaves ("the copy path already copies every column")
+     is a claim like any other. Check it against the code, and report a false
+     one as a defect in the spec, even when it sits in a later task's area.
    - **standards** — does the change look like it belongs in this repo? Three
      checks, in this order:
      1. *Convention sweep* (see above): the change against the code around it.
@@ -335,6 +388,16 @@ job, once you've shown them.
    backed by an executed repro or two quoted artifacts drops to `warning`. Dedupe
    across lenses. Sort worst-first and number them. A finding that arrived
    without a usable `fix:` or `verify:` gets one written from its proof.
+
+   Give every finding its origin (see *Origin check*). Then sort it into one of
+   four sections:
+   - **introduced:** `new` or `mixed`; numbered `1…`, and the only section that
+     sets the verdict.
+   - **existing:** pre-existing problems; numbered `E1…`.
+   - **deferred:** criteria a later task owns; numbered `D1…`. Each names the
+     task and is checked to exist in the tasks file.
+   - **ci-covered:** findings the failing CI job already catches; one line
+     each, not charged.
 
    Then audit the lenses, not just the findings. A lens that returned nothing, or
    that cited no command it actually ran, did **not** clear its axis — mark that
@@ -373,11 +436,13 @@ sequence, worst-first, so each severity is a contiguous range, and name the
 ranges in the header.
 
 ```
-VERDICT: BLOCKED — <one line>        (any critical or error)
-VERDICT: SOUND — <one line>          (warnings only, or nothing)
+VERDICT: BLOCKED — <one line>        (any introduced critical or error)
+VERDICT: SOUND — <one line>          (introduced warnings only, or nothing)
 
 scope:   <what was reviewed>
 spec:    <source found, or "none found">
+stack:   <part n of m, its tasks — or "not stacked">
+ci:      <passing | failing: <job> at <step> | not a PR>
 mode:    <solo|fan-out> — <lines, files, packages, risk surface>
 lenses:  correctness <reported|no findings|UNPROBED> · spec <…> · standards <…>
 index:   critical 1 · errors 2–3 · warnings 4–6
@@ -394,6 +459,17 @@ index:   critical 1 · errors 2–3 · warnings 4–6
    I believe this but could not prove it.
    verify: <the command or check that would settle it>
 
+existing (not introduced by this change):
+E1. [critical] <file:line> — <claim>
+   origin: existing — <where it already lives on the base>
+   proof:  <…>
+   fix:    <the follow-up, not a change to this diff>
+
+deferred (owned by a later part):
+D1. <criterion> — owned by <task id> · checked: <the task line, verbatim>
+
+ci-covered: <finding> — caught by <job/step>
+
 attacked and held: <what you tried that didn't break it>
 not probed:        <surface you could not reach, and why>
 cleanup:           <n> trees removed · 0 left for this run · real tree unchanged
@@ -406,6 +482,23 @@ Each `fix:` is one independent change: a file, a place, and what changes. When
 one only makes sense after another, write `after 2`. Say "delete X" outright,
 not "consider simplifying". Numbers are assigned at the merge, never by a lens.
 Leave empty ranges out of `index:`.
+
+Every numbered finding carries an `origin:` line (`new`, `existing` or
+`mixed`). Leave empty sections out.
+
+**Conventional comments.** When the user's instructions ask for a report in
+conventional comments, render each finding as `label (decoration): subject`:
+
+| Vimes | Conventional comment |
+|---|---|
+| introduced critical or error | `issue (blocking)` |
+| introduced warning | `suggestion (non-blocking)`, or `question` when the doubt is about intent |
+| existing | `thought (non-blocking)`, or `issue (non-blocking)` when proven |
+| deferred | `note` |
+| a style point backed only by a sibling | `nitpick (non-blocking)` |
+
+Keep the proof, `fix:` and `verify:` lines under each finding. Labels never
+outrank the ladder: a `warning` never becomes `issue (blocking)`.
 
 Findings worst-first. If there are none, still print what you attacked. A gate
 that never passes anything is a broken gate, not a rigorous one.
