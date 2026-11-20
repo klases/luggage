@@ -1,0 +1,9 @@
+# Test evidence
+
+For each material claim, identify the observable result and the source of the expected result. Check whether the assertion follows the contract or repeats implementation logic. Follow mocks and fixtures to see whether they bypass the boundary that matters. Look for the smallest meaningful missing negative, inverse, boundary, state-transition or property check. Verify whether existing unchanged tests already cover it.
+
+Distinguish source inspection, an observed test run and measured fault sensitivity. Report the revision, relevant environment, check, result and limitations for observed evidence. A setup failure leaves the intended behavior unobserved. A static weak-oracle hypothesis can be actionable with a concrete faulty behavior that would still satisfy the assertions.
+
+Before retaining a test-gap defect, establish that the proposed fault violates an accepted observable contract, and check the other responsible test surfaces. Merely differing from the current implementation (for example, returning before best-effort telemetry settles) does not establish a missing requirement. Separate a demonstrated verification-claim gap from an optional strengthening recommendation. State whether sensitivity was inspected or measured; do not call a hypothetical survivor an executed mutation.
+
+Only use a focused mutation where execution and mutation are explicitly authorized in an enforced disposable, credential-free environment with filesystem, network and resource controls. Establish a passing baseline and state which intended behavior the fault changes. A killed mutant requires failure for the expected behavioral reason. A surviving meaningful mutant shows those selected checks missed that fault. Record equivalent mutants, invalid mutants and infrastructure failures separately. Confirm a regression check probes the original failure before relying on green results at the new revision.
