@@ -104,14 +104,15 @@ The coordinator resolves scope, chooses the workflow and assembles the result. T
 
 ## What you get—and what remains separate
 
-A report identifies the reviewed revision and scope, supported findings with locations and triggering conditions, recommendations or owner questions, and verification/coverage limits. Impact and confidence are separate. Zero findings is valid, not proof that the change is correct.
+A report opens with a verdict (approve, approve-with-comments or request-changes), then identifies the reviewed revision and scope, supported findings with locations and triggering conditions, recommendations or owner questions, and verification/coverage limits. Impact and confidence are separate. Zero findings is valid, not proof that the change is correct.
 
 The native Claude agents have read/search tools only. Tests, builds and targeted mutations require separate authorization and a coordinator-provided controlled execution environment. A request for a deeper review does not itself grant execution permission. Fixes, commits, pushes, GitHub comments and merge decisions are separate actions.
 
 ## Further reading
 
 - [SKILL.md](SKILL.md): coordinating instructions.
-- [Review contract](references/review-contract.md): evidence, findings and candidate dispositions.
+- [Investigation](references/investigation.md): the task, implementation and verification steps every reviewer follows, including checking the change against its spec and acceptance criteria.
+- [Review contract](references/review-contract.md): evidence, severity, the blocks-merge flag and candidate dispositions.
 - [Workflows](references/workflows.md) and [host support](references/hosts.md): interaction, delivery and runtime limits.
 - [Sources](references/sources.md) and [NOTICE.md](NOTICE.md): inspiration and adapted material.
 - [Evaluation recorder](evaluation/README.md): developer tooling for input identities, budgets and report accounting; not a prerequisite for an ordinary review.

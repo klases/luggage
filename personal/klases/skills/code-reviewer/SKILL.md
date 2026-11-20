@@ -17,30 +17,22 @@ Challenge the task, implementation and verification. Return supported findings, 
 
 ## Review
 
-Use the [review contract](references/review-contract.md) for every investigation and finding. A fresh reviewer gets the required outcome and raw evidence before the builder's persuasive conclusions. Fresh context reduces anchoring; it does not establish independent correctness.
+Before investigating, read [investigation](references/investigation.md) and the [review contract](references/review-contract.md). Every pass reads both, including a single compact pass. Investigation covers the three responsibilities every review addresses: the task against its spec and acceptance criteria, the implementation and its unintended impact, and the verification. The contract defines evidence, severity, the blocks-merge flag and dispositions.
 
-Always address these responsibilities, or explain concrete inapplicability:
+A compact fresh review is valid for a small change. On a large or high-risk change, run the Behavioral tests and Security [specialists](references/specialists.md) by default, then up to two more aspects whose triggers appear in the change. Use [security guidance](references/security.md) when trust boundaries, sensitive data, dependencies or execution authority are affected. Delegate a separate finding challenger for a consequential or disputed claim. Pass the pinned scope and actual focus instructions; do not recursively spawn reviewers or grant extra capabilities. Do not duplicate a finding just because multiple aspects identify it.
 
-- **Task:** does the change solve the stated problem? Find misread requirements, contradictions, unstated assumptions and implementation-invented obligations. Distinguish owner questions from demonstrated violations. Do not redesign the product or remove requirements unilaterally.
-- **Implementation:** trace changed behavior through definitions, callers, state and error paths. Seek reachable counterexamples and inspect removed behavior. Follow [change impact](references/change-impact.md) into affected unchanged code; the diff starts the investigation, it does not bound it.
-- **Verification:** inspect whether expectations and observations establish the claim, which incorrect behavior would still pass, and what was actually executed. Apply [test evidence](references/test-evidence.md); tests inspected, tests run and fault sensitivity measured are different evidence.
+## Synthesis
 
-Select relevant [specialist guidance](references/specialists.md) from affected behavior and the requested profile, not only changed filenames. Use [security guidance](references/security.md) when trust boundaries, sensitive data, dependencies or execution authority are affected. Do not duplicate a finding just because multiple aspects identify it.
+When more than one pass ran (main reviewer, specialists, challenger), reconcile their output into one result before reporting:
 
-A compact fresh review is valid. Delegate bounded specialists or a separate finding challenger only when useful for the selected depth, risk or unresolved evidence. Pass the pinned scope and actual focus instructions; do not recursively spawn reviewers or grant extra capabilities.
-
-## Evidence and disposition
-
-- Separate impact/severity from confidence and evidence type. Static evidence can establish a defect; an executed command does not automatically make it serious.
-- Give the trigger, violated behavior/requirement, consequence, relevant location and supporting trace or observed result. Distinguish introduced regressions, exposed latent defects and pre-existing issues.
-- Seek disconfirming evidence: other callers, guards, intended behavior and existing tests. A style preference or speculative concern is not a confirmed defect.
-- Preserve each candidate's identity through synthesis: retain, duplicate with explicit parent, reject with evidence, or unresolved. A challenger failing to refute is not confirmation; unsupported rejection is not resolution.
-- Use bounded execution only within explicitly permitted environments. Target-controlled tests/builds are code execution. Never mutate the live checkout; a detached worktree alone is not containment.
-- Targeted mutation tests a stated behavioral hypothesis. Distinguish meaningful killed/surviving mutants, equivalent or invalid mutants, and infrastructure failure. Never fabricate an observed result to fill the report.
+1. Group candidates by cause. Each group gets one disposition and one severity under the review contract. When passes disagreed, state which evidence decided it and which pass was overruled; an overrule follows the contract's rejection rule.
+2. Carry each merged candidate's concrete claim into the merged text: its trigger, named surviving fault and location. Merging must not drop a claim a pass established.
+3. Promote a lead a pass reported outside its focus to a candidate when it carries a trigger, trace and consequence; otherwise list it as an uncovered path. Keep style, wording and preference points as recommendations; they never decide the verdict.
+4. Close with one verdict: **request-changes** when a retained finding is marked blocks-merge, **approve-with-comments** when retained findings or owner questions remain, **approve** when none do. The verdict and every candidate's disposition agree.
 
 ## Report and finish
 
-Lead with material supported findings and the scope actually reviewed. Keep recommendations and owner questions separate from defects. Give concise evidence and a concrete correction or validation step, then disclose uncovered paths, unavailable checks and stale inputs.
+Lead with the verdict, material supported findings and the scope actually reviewed. Keep recommendations and owner questions separate from defects. Give concise evidence and a concrete correction or validation step, then disclose uncovered paths, unavailable checks and stale inputs.
 
 Use the selected workflow's presentation. Private reports stay private; coding feedback returns to the coordinator; interactive discussion can drill into evidence. No findings is a valid result, not proof of universal correctness.
 
@@ -48,4 +40,4 @@ Verify scoped-file/aspect accounting, candidate dispositions, input stability an
 
 ## Limits
 
-No fixes, commits, pushes, GitHub posting, provider changes, production probes or dependency installation are implied. Missing context or execution capability narrows the evidence and must remain visible. Sources and adapted material are documented in [sources](references/sources.md) and NOTICE.md.
+No fixes, commits, pushes, GitHub posting, provider changes, production probes or dependency installation are implied. Use bounded execution only within explicitly permitted environments, under [test evidence](references/test-evidence.md). Missing context or execution capability narrows the evidence and must remain visible. Sources and adapted material are documented in [sources](references/sources.md) and NOTICE.md.
