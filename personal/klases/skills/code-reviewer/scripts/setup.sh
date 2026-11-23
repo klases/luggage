@@ -28,17 +28,19 @@ JQ_RULES='
   def check_common($execution):
     ([select(.execution != null and (.execution | IN($execution[]) | not))
        | "execution must be one of \($execution | join(", "))"]
-     + [("gh_account", "reports_root", "fallback_area", "area") as $k
+     + [("gh_account", "report_path") as $k
         | select(.[$k] != null and (.[$k] | type) != "string") | "\($k) must be a string"]
+     + [select((.report_path | type) == "string" and (.report_path | contains("{id}") | not))
+        | "report_path must contain {id}, or every PR would share one file"]
      + [("default_focus", "spec_roots", "policy") as $k
         | select(.[$k] != null and (.[$k] | strings | not)) | "\($k) must be a list of strings"]);
   def global_errors($execution):
     if type != "object" then ["global must be an object"] else
-      check_fields(["reports_root", "fallback_area", "execution"]; ["gh_account", "default_focus"])
+      check_fields(["report_path", "execution"]; ["gh_account", "default_focus"])
       + check_common($execution) end;
   def entry_errors($execution):
     if type != "object" then ["repo entry must be an object"] else
-      check_fields(["area"]; ["spec_roots", "policy", "gh_account", "execution", "default_focus"])
+      check_fields([]; ["report_path", "spec_roots", "policy", "gh_account", "execution", "default_focus"])
       + check_common($execution) end;
   def config_errors($execution):
     if type != "object" then ["config must be an object"] else
@@ -176,12 +178,11 @@ cmd_wizard() {
     echo "Global settings apply to every repo without its own entry."
     local global
     global=$(jq -cn \
-      --arg root "$(ask "Reports root (folder reports go under)" "~/workspace/docs")" \
-      --arg area "$(ask "Area for repos without an entry" "external")" \
+      --arg path "$(ask "Report file path; {owner}, {repo} and {id} are filled in" "~/notes/pr-reviews/{owner}_{repo}_{id}.md")" \
       --arg exec "$(ask "Execution: source-only, unit or unit+integration" "source-only")" \
       --arg gh "$(ask "gh account (blank for none)" "")" \
       --argjson focus "$(list_json "$(ask "Default focus, comma separated" "correctness,tests,maintainability")")" \
-      '{reports_root: $root, fallback_area: $area, execution: $exec}
+      '{report_path: $path, execution: $exec}
        + (if $gh == "" then {} else {gh_account: $gh} end)
        + (if $focus == [] then {} else {default_focus: $focus} end)')
     cmd_write --global "$global"
@@ -192,12 +193,15 @@ cmd_wizard() {
   [ -n "$repo" ] || exit 0
   local entry
   entry=$(jq -cn \
-    --arg area "$(ask "Area for $repo reports" "${repo#*/}")" \
+    --arg path "$(ask "Report path override (blank keeps global)" "")" \
     --argjson specs "$(list_json "$(ask "Spec roots, comma separated (blank for none)" "")")" \
     --argjson policy "$(list_json "$(ask "Policy files, comma separated (blank for none)" "")")" \
     --arg exec "$(ask "Execution override (blank keeps global)" "")" \
-    '{area: $area, spec_roots: $specs, policy: $policy}
-     + (if $exec == "" then {} else {execution: $exec} end)')
+    --arg gh "$(ask "gh account override (blank keeps global)" "")" \
+    '{spec_roots: $specs, policy: $policy}
+     + (if $path == "" then {} else {report_path: $path} end)
+     + (if $exec == "" then {} else {execution: $exec} end)
+     + (if $gh == "" then {} else {gh_account: $gh} end)')
   cmd_write --repo "$repo" --entry "$entry"
   [ "$(ask "Write this entry? y/n" "n")" = y ] || die 2 "nothing written"
   cmd_write --repo "$repo" --entry "$entry" --apply

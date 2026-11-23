@@ -8,11 +8,10 @@ from pathlib import Path
 SETUP = Path(__file__).with_name("setup.sh")
 
 GLOBAL = {
-    "reports_root": "~/workspace/docs",
-    "fallback_area": "reviews",
+    "report_path": "~/notes/pr-reviews/{owner}_{repo}_{id}.md",
     "execution": "source-only",
 }
-ENTRY = {"area": "eversports", "spec_roots": [], "policy": [], "execution": "unit"}
+ENTRY = {"spec_roots": [], "policy": [], "execution": "unit"}
 
 
 class SetupTest(unittest.TestCase):
@@ -48,7 +47,7 @@ class SetupTest(unittest.TestCase):
     def test_write_is_a_dry_run_until_apply(self):
         done = self.run_setup("write", "--global", json.dumps(GLOBAL))
         self.assertEqual(done.returncode, 0, done.stderr)
-        self.assertIn("reports_root", done.stdout)
+        self.assertIn("report_path", done.stdout)
         self.assertFalse(self.config.exists())
 
     def test_repo_entry_needs_a_global_section_first(self):
@@ -60,7 +59,7 @@ class SetupTest(unittest.TestCase):
 
     def test_repo_entries_merge_without_touching_other_entries(self):
         self.write_global()
-        other = ENTRY | {"area": "matchi"}
+        other = ENTRY | {"gh_account": "other-login"}
         for repo, entry in [("matchi/webapp", other), ("eversport/eversports", ENTRY)]:
             done = self.run_setup("write", "--repo", repo, "--entry", json.dumps(entry), "--apply")
             self.assertEqual(done.returncode, 0, done.stderr)
@@ -75,7 +74,9 @@ class SetupTest(unittest.TestCase):
     def test_invalid_values_are_rejected_without_writing(self):
         for args, message in [
             (["--global", json.dumps(GLOBAL | {"execution": "everything"})], "execution"),
-            (["--global", json.dumps({"fallback_area": "reviews", "execution": "unit"})], "reports_root"),
+            (["--global", json.dumps({"execution": "unit"})], "report_path"),
+            (["--global", json.dumps(GLOBAL | {"report_path": "~/notes/review.md"})], "{id}"),
+            (["--repo", "a/b", "--entry", json.dumps({"report_path": "~/x/{owner}.md"})], "{id}"),
             (["--global", json.dumps(GLOBAL | {"colour": "blue"})], "colour"),
             (["--global", "{not json"], "JSON"),
         ]:
@@ -97,7 +98,7 @@ class SetupTest(unittest.TestCase):
         listed = json.loads(self.run_setup("check").stdout)
         self.assertEqual(listed["source"], "repo")
         self.assertEqual(listed["settings"]["execution"], "unit")
-        self.assertEqual(listed["settings"]["reports_root"], "~/workspace/docs")
+        self.assertEqual(listed["settings"]["report_path"], GLOBAL["report_path"])
 
 
 if __name__ == "__main__":

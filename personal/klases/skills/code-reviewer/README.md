@@ -26,11 +26,11 @@ The agent looks at the repo you are in, asks a few questions and shows the confi
 /klases:code-reviewer report <base>..<head>
 ```
 
-The review runs without questions unless the PR cannot be pinned, writes the full report to `<reports_root>/<area>/reviews/<owner>-<repo>/pr-1234.md` and prints a summary:
+The review runs without questions unless the PR cannot be pinned, writes the full report to the configured `report_path` (for example `~/notes/pr-reviews/your-org_your-repo_1234.md`) and prints a summary:
 
 ```markdown
 **request-changes** · <owner>/<repo>#1234 @ a1b2c3d..9f8e7d6
-Report: ~/notes/your-repo/reviews/your-org-your-repo/pr-1234.md
+Report: ~/notes/pr-reviews/your-org_your-repo_1234.md
 
 | ID | Kind | Rating | Blocks | Finding | Suggestion |
 |----|------|--------|--------|---------|------------|
@@ -80,25 +80,36 @@ The config is one local file, `~/.config/klases/code-reviewer.json`, outside thi
 ```json
 {
   "global": {
-    "reports_root": "~/notes",
-    "fallback_area": "external",
+    "report_path": "~/notes/pr-reviews/{owner}_{repo}_{id}.md",
     "execution": "source-only",
     "gh_account": "your-github-login",
-    "default_focus": ["correctness", "tests", "maintainability"]
+    "default_focus": [
+      "correctness",
+      "tests",
+      "maintainability"
+    ]
   },
   "repos": {
     "your-org/your-repo": {
-      "area": "your-repo",
-      "spec_roots": ["~/code/your-specs-repo/openspec/changes"],
-      "policy": ["~/notes/rules/your-repo.md"],
+      "spec_roots": [
+        "~/code/your-specs-repo/openspec/changes"
+      ],
+      "policy": [
+        "~/notes/rules/your-repo.md"
+      ],
       "execution": "unit"
+    },
+    "other-org/other-repo": {
+      "gh_account": "your-other-login",
+      "report_path": "~/notes/other-org/pr-reviews/{repo}_{id}.md"
     }
   }
 }
 ```
 
 - **`global`** is required and applies to every repo.
-- **`repos`** entries are optional, keyed by `owner/name` from the checkout's `origin` remote. An entry overrides `global` field by field.
+- **`repos`** entries are optional, keyed by `owner/name` from the checkout's `origin` remote. An entry overrides `global` field by field; use one for a repo that needs another GitHub account, its own specs and rules, or another report location.
+- **`report_path`** is a file template: `{owner}`, `{repo}` and `{id}` (the PR number, or `range-<base7>-<head7>`) are filled in, and it must contain `{id}`. Reports start with frontmatter (`pr`, `repo`, `base_sha`, `head_sha`, `verdict`, `reviewed_at`).
 - A repo without an entry is reviewed with `global` alone. It gets no spec roots or policy files, and the report says so.
 - If the file or its `global` section is missing, every mode except `setup` stops and offers setup.
 - `execution` is the most target code a review may run: `source-only`, `unit` or `unit+integration`. Integration runs happen only in an interactive session, and the setting never grants more than your session already allows.

@@ -57,8 +57,8 @@ Verify scoped-file/aspect accounting, candidate dispositions, input stability an
 Setup creates `~/.config/klases/code-reviewer.json` (see [config](references/config.md)). `scripts/setup.sh` is the only writer; you ask the questions.
 
 1. Run `scripts/setup.sh detect` in the user's checkout. It reports the config's state, the repo, any existing entry, an in-repo `openspec/changes` and the current gh user.
-2. Without a global section, ask for `reports_root`, `fallback_area`, `execution` (default `source-only`), `gh_account` and `default_focus`. Propose values from what you can see, and mark each proposal as a guess.
-3. Then add or edit the current repo's entry, or a repo the user names: `area`, `spec_roots`, `policy`, and any overrides. Look for candidate spec roots and rule files the user's own instructions mention and offer them; confirm each path exists.
+2. Without a global section, ask for `report_path`, `execution` (default `source-only`), `gh_account` and `default_focus`. Look in the user's instructions for an existing home for review reports and propose it as `report_path`. Propose values from what you can see, and mark each proposal as a guess.
+3. Then add or edit the current repo's entry, or a repo the user names: `spec_roots`, `policy`, and any overrides of the global fields. Look for candidate spec roots and rule files the user's own instructions mention and offer them; confirm each path exists.
 4. Run `scripts/setup.sh write ...` without `--apply` and show the diff. Write with `--apply` only after the user says yes. Pass values as JSON; the script validates them.
 5. Finish with `scripts/setup.sh check` to show the resolved settings.
 
