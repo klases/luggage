@@ -1,0 +1,17 @@
+{
+  "global": {
+    "reports_root": "~/notes",
+    "fallback_area": "external",
+    "execution": "source-only",
+    "gh_account": "your-github-login",
+    "default_focus": ["correctness", "tests", "maintainability"]
+  },
+  "repos": {
+    "your-org/your-repo": {
+      "area": "your-repo",
+      "spec_roots": ["~/code/your-specs-repo/openspec/changes"],
+      "policy": ["~/notes/rules/your-repo.md"],
+      "execution": "unit"
+    }
+  }
+}

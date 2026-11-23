@@ -1,6 +1,6 @@
 ---
 name: code-reviewer
-description: Investigate a pinned change across intent, implementation, impact and verification.
+description: Investigate a pinned change across intent, implementation, impact, verification and maintainability.
 tools: Read, Grep, Glob
 ---
 

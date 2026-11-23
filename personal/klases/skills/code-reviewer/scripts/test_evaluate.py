@@ -81,6 +81,23 @@ class HarnessTest(unittest.TestCase):
             with self.subTest(candidates=candidates), self.assertRaisesRegex(ValueError, message):
                 evaluate.validate_candidates(candidates)
 
+    def test_maintainability_candidates_take_a_priority_instead_of_a_severity(self):
+        suggestion = dict(id="M1", kind="maintainability", disposition="retain",
+                          priority="should", confidence="high", evidence_type="static",
+                          evidence="priceFor() reads the DB and applies rules at src/price.ts:40.")
+        defect = dict(id="F1", kind="defect", disposition="retain", severity="low",
+                      confidence="high", evidence_type="static",
+                      evidence="The retry log drops orderId at src/retry.ts:9.")
+        evaluate.validate_candidates([suggestion, defect])
+        for candidates, message in [
+            ([suggestion | {"priority": "high"}], "priority"),
+            ([suggestion | {"severity": "low"}], "severity"),
+            ([defect | {"priority": "should"}], "priority"),
+            ([suggestion | {"kind": "style"}], "kind"),
+        ]:
+            with self.subTest(candidates=candidates), self.assertRaisesRegex(ValueError, message):
+                evaluate.validate_candidates(candidates)
+
     def test_empty_expected_run_map_cannot_certify_a_review(self):
         with self.assertRaisesRegex(ValueError, "nonempty"):
             evaluate.reconcile({}, self.root)

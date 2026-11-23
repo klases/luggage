@@ -4,7 +4,7 @@ Every investigating pass reads this before reviewing: the main reviewer, each sp
 
 A fresh reviewer gets the required outcome and raw evidence before the builder's persuasive conclusions. Fresh context reduces anchoring; it does not establish independent correctness.
 
-Address each responsibility below, or explain concrete inapplicability.
+Address each responsibility below (task, implementation, verification and maintainability), or explain concrete inapplicability.
 
 ## Task
 
@@ -34,3 +34,13 @@ For each material claim, identify the observable result and the source of its ex
 2. Before saying a test catches a fault, check that it can fail for it. Follow mocks and fixtures to see whether they bypass the boundary that matters, and check the runner's environment: time zone, environment files and defaults that mirror production. Name the fault that would still pass.
 3. Name the smallest missing negative, inverse, boundary, state-transition or property check, and whether unchanged tests already cover it.
 4. Keep tests inspected, tests run and fault sensitivity measured as distinct evidence. Use [test evidence](test-evidence.md) when you report an observed run, retain a test-gap defect or run a mutation.
+
+## Maintainability
+
+Will the next developer understand, change and test this code without strain? Judge the changed lines and existing code the change makes harder to follow; pre-existing issues the change does not touch are out of scope.
+
+1. **Readability.** Find names, control flow and data shapes that mislead or hide intent: a name that says less than or something other than what the code does, nesting that buries the main path, a magic value, a comment that restates code while the reason goes unstated.
+2. **Cognitive load.** Count what a reader must hold at once to follow one behavior: flags and modes threaded through layers, state spread across files, implicit ordering, conditionals over a type that a map or enum entry would express, an abstraction used once.
+3. **Testability.** Find what blocks a focused test of the changed behavior: a hidden clock, environment or global; logic tangled with I/O; a dependency created inside instead of passed in; a test that must mock past the boundary it claims to check. Name the seam that would make the behavior testable.
+
+Each suggestion names the reader's cost in concrete terms ("to know whether `refund` emails, follow 3 flags through 2 files"), the location, and a concrete rewrite that preserves behavior. A preference without a nameable cost is not a suggestion. Rate it with a priority from the [review contract](review-contract.md#maintainability-suggestions); report at most five, highest reader cost first, and count the rest in coverage.

@@ -179,6 +179,13 @@ def _nonempty(value):
     return isinstance(value, str) and bool(value.strip())
 
 
+# A defect is rated by impact; a maintainability suggestion by how strongly it is advised.
+RATING_BY_KIND = {
+    "defect": ("severity", ("critical", "high", "medium", "low")),
+    "maintainability": ("priority", ("should", "consider", "nit")),
+}
+
+
 def validate_candidates(candidates):
     if not isinstance(candidates, list):
         raise ValueError("candidates must be a list")
@@ -197,15 +204,22 @@ def validate_candidates(candidates):
             raise ValueError(f"{identity}: invalid disposition")
         if not _nonempty(candidate.get("evidence")):
             raise ValueError(f"{identity}: evidence or reason required")
+        kind = candidate.get("kind", "defect")
+        if kind not in RATING_BY_KIND:
+            raise ValueError(f"{identity}: invalid kind")
+        rating, values = RATING_BY_KIND[kind]
+        other_rating = {"severity": "priority", "priority": "severity"}[rating]
+        if other_rating in candidate:
+            raise ValueError(f"{identity}: {kind} takes {rating}, not {other_rating}")
         if disposition == "retain":
             retained.add(identity)
             dimensions = {
-                "severity": ("critical", "high", "medium", "low"),
+                rating: values,
                 "confidence": ("high", "medium", "low"),
                 "evidence_type": ("static", "observed", "mixed"),
             }
-            for field, values in dimensions.items():
-                if candidate.get(field) not in values:
+            for field, allowed in dimensions.items():
+                if candidate.get(field) not in allowed:
                     raise ValueError(f"{identity}: invalid {field}")
         if disposition == "duplicate":
             duplicates.append((identity, candidate.get("parent")))

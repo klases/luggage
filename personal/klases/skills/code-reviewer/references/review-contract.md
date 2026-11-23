@@ -8,6 +8,16 @@ Severity describes impact under stated prerequisites. Use **critical** for an es
 
 Mark a retained finding **blocks-merge** when, on a reachable path, it violates a SHALL or SHALL NOT requirement, breaks a required build, synth, deploy or check, or causes data loss or unauthorized access. The flag is separate from severity: a required-build failure stays medium and still blocks. A finding that would block only depending on one owner's answer is an owner question, not a blocker.
 
+## Maintainability suggestions
+
+A maintainability suggestion is a candidate of kind `maintainability`, with IDs `M1`, `M2`, … (defects use `F1`, `F2`, …). It has a priority instead of a severity and never blocks merge or produces request-changes:
+
+- **should**: the cost recurs for every reader or blocks a focused test of the changed behavior.
+- **consider**: a real but local cost, such as one misleading name or one buried branch.
+- **nit**: a small improvement that is still worth the author's time.
+
+Suggestions use the same evidence, confidence and dispositions as defects. A suggestion that turns out to hide a reachable fault becomes a defect with its own severity.
+
 ## Evidence
 
 - Seek disconfirming evidence: other callers, guards, intended behavior and existing tests. A style preference or speculative concern is not a confirmed defect.
@@ -18,7 +28,7 @@ Mark a retained finding **blocks-merge** when, on a reachable path, it violates 
 
 Keep each candidate ID and its disposition through every pass and the synthesis:
 
-- **Retain** with evidence, severity, confidence and whether it blocks merge.
+- **Retain** with evidence, severity (or priority for a suggestion), confidence and whether it blocks merge.
 - **Duplicate** with a direct retained parent and a reason the two share a cause.
 - **Reject** with the evidence that defeats the claim.
 - **Unresolved** with the missing fact or check that would decide it.
