@@ -22,7 +22,7 @@ owns, such as which GitHub account to use, ask; don't pick one.
 
 1. Skill names are unique across the repo and match their folder name. pi keeps only the first skill it finds with a given name.
 2. Skills in `common/` use only Agent Skills frontmatter (`name`, `description`, `license`, `compatibility`, `metadata`, `allowed-tools`) and work in pi as well as Claude Code. Personal spaces may use Claude Code–only fields.
-3. Changes to `common/` go through a PR approved by someone other than its author. Personal-space changes, and the marketplace entry for a new space, go straight to `main`. The `pre-push` hook (enable it with `git config core.hooksPath scripts/hooks`) and the `common-review` check back this up.
+3. Changes to `common/` go through a PR approved by someone other than its author. Personal-space changes, and the marketplace entry for a new space, go straight to `main`. The `pre-push` hook (enable it with `git config core.hooksPath scripts/hooks`) backs this up; the approval itself is checked by whoever merges.
 4. A space is self-contained: nothing in it refers outside its own folder. Copy what you need.
 5. No `version` fields in manifests, so installs follow git.
 6. Agents are Markdown with frontmatter in a space's `agents/` folder, and target Claude Code only for now.

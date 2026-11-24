@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Checks the repo rules a script can check. Run by CI and by the repo skills.
+# Checks the repo rules a script can check. Run by the repo skills and before every commit.
 set -euo pipefail
 shopt -s nullglob
 cd "$(git rev-parse --show-toplevel)"
@@ -46,7 +46,8 @@ for f in common/skills/*/SKILL.md; do
   done
 done
 
-# The Agent Skills spec, when the reference validator is installed (CI installs it).
+# The Agent Skills spec, when the reference validator is installed:
+#   pip install "skills-ref @ git+https://github.com/agentskills/agentskills#subdirectory=skills-ref"
 if command -v skills-ref >/dev/null; then
   for f in "${skill_files[@]}"; do skills-ref validate "$(dirname "$f")" || fail=1; done
 else

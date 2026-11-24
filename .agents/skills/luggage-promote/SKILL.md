@@ -47,4 +47,4 @@ Nothing is changed until the user approves the proposal in step 3. Nothing is pu
    In Claude Code the command changes from `/<handle>:<name>` to `/common:<name>`. pi is unaffected.
    ```
 
-   Ask the user to fill in any **Tested** line you couldn't observe yourself. On their yes, run `git push -u origin promote/<name>` and `gh pr create`. The `common-review` check stays red until someone other than the author approves.
+   Ask the user to fill in any **Tested** line you couldn't observe yourself. On their yes, run `git push -u origin promote/<name>` and `gh pr create`. Merge only after someone other than the author approves.
